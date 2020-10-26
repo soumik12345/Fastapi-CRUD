@@ -1,28 +1,25 @@
-# Pull Base Image
+# pull official base image
 FROM python:3.8.1-alpine
 
-# Set Working Directory
-RUN mkdir -p /usr/src/backend
+# set work directory
+RUN mkdir /usr/src/backend
 WORKDIR /usr/src/backend
 
-# Set Environment Variables
+# set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Copy requirements.txt
+# copy requirements file
 COPY ./requirements.txt /usr/src/backend/requirements.txt
 
-# Install Dependencies
+# install dependencies
 RUN set -eux \
     && apk add --no-cache --virtual .build-deps build-base \
-        libressl-dev libffi-dev gcc musl-dev python3-dev
+        libressl-dev libffi-dev gcc musl-dev python3-dev \
+        postgresql-dev \
+    && pip install --upgrade pip setuptools wheel \
+    && pip install -r /usr/src/backend/requirements.txt \
+    && rm -rf /root/.cache/pip
 
-# Install Python Dependencies
-RUN pip install --upgrade pip setuptools wheel
-RUN pip install -r /usr/src/backend/requirements.txt
-
-# Remove pip cache
-RUN rm -rf /root/.cache/pip
-
-# Copy Project to Working Directory
+# copy project
 COPY . /usr/src/backend/
